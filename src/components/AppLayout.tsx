@@ -1,7 +1,8 @@
 import { ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, ClipboardList, History, Sun, Moon } from "lucide-react";
+import { LayoutDashboard, ClipboardList, History, Sun, Moon, LogOut } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
+import { useAuth } from "@/lib/AuthContext";
 
 const navItems = [
   { path: "/", icon: LayoutDashboard, label: "Dashboard" },
@@ -13,6 +14,15 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/login");
+  };
+
+  const userEmail = user?.email || "";
+  const displayName = user?.user_metadata?.full_name || userEmail.split("@")[0];
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -48,13 +58,26 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        <button
-          onClick={toggleTheme}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-        >
-          {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-          {theme === "light" ? "Mode Gelap" : "Mode Terang"}
-        </button>
+        <div className="space-y-1 pt-2 border-t border-border">
+          <div className="px-3 py-2">
+            <p className="text-xs font-medium text-foreground truncate">{displayName}</p>
+            <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
+          </div>
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors w-full"
+          >
+            {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+            {theme === "light" ? "Mode Gelap" : "Mode Terang"}
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors w-full"
+          >
+            <LogOut className="w-5 h-5" />
+            Keluar
+          </button>
+        </div>
       </aside>
 
       {/* Main content */}
@@ -67,12 +90,20 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             </div>
             <span className="font-bold text-foreground text-sm">Pengawasan Tata Niaga</span>
           </div>
-          <button
-            onClick={toggleTheme}
-            className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-foreground"
-          >
-            {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-foreground"
+            >
+              {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-destructive"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </header>
 
         <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto animate-fade-in">
